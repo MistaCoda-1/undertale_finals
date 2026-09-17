@@ -1,153 +1,64 @@
 package src;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.image.BufferedImage;
-import java.util.Objects;
 
-public class Main extends JPanel implements KeyListener {
+// ==========================================
+// You were working on:
+//      ShowMainMenu()
 
-    // Player position
-    int x = 100;
-    int y = 100;
+/* =================
+    ShowMainMenu()
+        Finish getting the buttons to work.
+        Remove temporary panels (red and blue panel)
+*/
 
-    // How many pixels the player moves
-    int speed = 5;
+/* =================
+    More things to do:
+        Create background art for blue panel area
+        Create art for logo
+        Create art for app icon
+        Create enemy character sprite
+*/
 
-    // Which keys are currently being held
-    boolean up;
-    boolean down;
-    boolean left;
-    boolean right;
+/* ================
+    Random shit to add:
+        Miku miku beam button
+        Miku button (turns enemy character sprite into miku)
+*/
 
-    BufferedImage sprite;
+public class Main extends JFrame{
 
     public Main() {
-        try {
-            sprite = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/resources/player_soul.png")));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        setTitle("UNDERTALEEEEE");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(1000, 750);
+        setLocationRelativeTo(null);
+        setResizable(false);
 
-        setPreferredSize(new Dimension(800, 600));
-        setBackground(Color.BLACK);
+        showLogin();
+        // showMainMenu();
 
-        // Allow this panel to receive keyboard input
-        setFocusable(true);
-        addKeyListener(this);
+        setVisible(true);
     }
 
-    // This is responsible for DRAWING the game
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        // Battle box
-        g.setColor(Color.BLACK);
-        g.fillRect(100, 100, 250, 250);
-
-        g.setColor(Color.WHITE);
-        g.drawRect(100, 100, 250, 250);
-
-        // Player
-        g.drawImage(sprite, x, y, null);
-    }
-    
-    // This is responsible for UPDATING the player
-    public void update() {
-
-        if (up) {
-            y -= speed;
-        }
-
-        if (down) {
-            y += speed;
-        }
-
-        if (left) {
-            x -= speed;
-        }
-
-        if (right) {
-            x += speed;
-        }
-
-        // Tell Swing to draw the screen again
+    public void showLogin() {
+        setContentPane(new LoginPanel(this));
+        revalidate();
         repaint();
     }
 
-    // Key pressed
-    @Override
-    public void keyPressed(KeyEvent e) {
-
-        if (e.getKeyCode() == KeyEvent.VK_UP) {
-            up = true;
-        }
-
-        if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            down = true;
-        }
-
-        if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            left = true;
-        }
-
-        if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            right = true;
-        }
+    public void showMainMenu() {
+        setContentPane(new MainMenuPanel(this));
+        revalidate();
+        repaint();
     }
 
-    // Key released
-    @Override
-    public void keyReleased(KeyEvent e) {
-
-        if (e.getKeyCode() == KeyEvent.VK_UP) {
-            up = false;
-        }
-
-        if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            down = false;
-        }
-
-        if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            left = false;
-        }
-
-        if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            right = false;
-        }
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-        // We don't need this
-    }
+    // To implement later
+    // public void showBattlePanel() {
+    //     setContentPane(new BattlePanel(this));
+    // }
 
     public static void main(String[] args) {
-
-        JFrame window = new JFrame("Simple Game");
-        Main game = new Main();
-
-        window.add(game);
-
-        window.pack();
-        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setLocationRelativeTo(null);
-        window.setVisible(true);
-
-        // Simple game loop
-        while (true) {
-
-            game.update();
-
-            try {
-                Thread.sleep(16);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        SwingUtilities.invokeLater(Main::new);
     }
 }
