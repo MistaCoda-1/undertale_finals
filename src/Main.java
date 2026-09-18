@@ -1,5 +1,3 @@
-package src;
-
 import javax.swing.*;
 
 // ==========================================
@@ -8,8 +6,8 @@ import javax.swing.*;
 
 /* =================
     ShowMainMenu()
-        Finish getting the buttons to work.
-        Remove temporary panels (red and blue panel)
+        Finish getting the buttons to work. *
+        Remove temporary panels (red and blue panel) *
 */
 
 /* =================
@@ -26,7 +24,7 @@ import javax.swing.*;
         Miku button (turns enemy character sprite into miku)
 */
 
-public class Main extends JFrame{
+public class Main extends JFrame {
 
     public Main() {
         setTitle("UNDERTALEEEEE");
@@ -37,27 +35,34 @@ public class Main extends JFrame{
 
         showLogin();
         // showMainMenu();
+        // showBattlePanel();
 
         setVisible(true);
     }
 
     public void showLogin() {
-        setContentPane(new LoginPanel(this));
+        JPanel login = new LoginPanel(this);
+        setContentPane(login);
         revalidate();
         repaint();
+        login.requestFocusInWindow();
     }
 
     public void showMainMenu() {
-        setContentPane(new MainMenuPanel(this));
+        JPanel mainMenu = new MainMenuPanel(this);
+        setContentPane(mainMenu);
         revalidate();
         repaint();
+        mainMenu.requestFocusInWindow();
     }
 
-    // To implement later
-    // public void showBattlePanel() {
-    //     setContentPane(new BattlePanel(this));
-    // }
-
+    public void showBattlePanel() {
+        JPanel battle = new BattlePanel(this);
+        setContentPane(battle);
+        revalidate();
+        repaint();
+        battle.requestFocusInWindow();
+    }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(Main::new);
     }

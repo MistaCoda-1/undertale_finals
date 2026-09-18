@@ -1,16 +1,12 @@
-package src;
-
 import javax.swing.*;
 import java.awt.*;
 
-import static src.UIUtils.styleButton;
-
-public class MainMenuPanel extends JPanel{
+public class MainMenuPanel extends JPanel {
     
-    JPanel redPanel = new JPanel();
-    JPanel bluePanel = new JPanel();
+    JPanel menuPanel = new JPanel();
+    JPanel artPanel = new JPanel();
 
-    JPanel buttonsPanel = new JPanel();
+    JPanel btnPanel = new JPanel();
 
     private final Main main;
 
@@ -20,39 +16,56 @@ public class MainMenuPanel extends JPanel{
         setLayout(new BorderLayout());
         setBackground(Color.BLACK);
 
-        buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
-        redPanel.setBackground(Color.RED);
-        bluePanel.setBackground(Color.BLUE);
+        menuPanel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
 
+        btnPanel.setLayout(new BoxLayout(btnPanel, BoxLayout.Y_AXIS));
+        // == Uncomment/Comment to show bounds/panel borders == //
+        btnPanel.setOpaque(false);
+        menuPanel.setOpaque(false);
+        artPanel.setOpaque(false);
+
+        menuPanel.setBackground(Color.RED);
+        artPanel.setBackground(Color.BLUE);
+        
+        menuPanel.setLayout(new GridBagLayout()); 
+        
         JButton startBtn = new JButton("START");
         JButton leaderboardBtn = new JButton("LEADERBOARD");
         JButton optionstBtn = new JButton("OPTIONS");
         JButton exittBtn = new JButton("EXIT");
 
-        styleButton(startBtn);
-        styleButton(leaderboardBtn);
-        styleButton(optionstBtn);
-        styleButton(exittBtn);
+        startBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        leaderboardBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        optionstBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        exittBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        buttonsPanel.add(Box.createVerticalStrut(350));
-        buttonsPanel.add(startBtn);
-        buttonsPanel.add(Box.createVerticalStrut(20));
+        UIUtils.styleButton(startBtn);
+        UIUtils.styleButton(leaderboardBtn);
+        UIUtils.styleButton(optionstBtn);
+        UIUtils.styleButton(exittBtn);
 
-        buttonsPanel.add(leaderboardBtn);
-        buttonsPanel.add(Box.createVerticalStrut(20));
+        btnPanel.add(startBtn);
+        btnPanel.add(Box.createVerticalStrut(20));
 
-        buttonsPanel.add(optionstBtn);
-        buttonsPanel.add(Box.createVerticalStrut(20));
+        btnPanel.add(leaderboardBtn);
+        btnPanel.add(Box.createVerticalStrut(20));
 
-        buttonsPanel.add(exittBtn);
+        btnPanel.add(optionstBtn);
+        btnPanel.add(Box.createVerticalStrut(20));
 
-        buttonsPanel.add(Box.createVerticalGlue());
+        btnPanel.add(exittBtn);
+        
+        menuPanel.add(btnPanel);
 
-        redPanel.add(buttonsPanel);
-
-        add(redPanel, BorderLayout.WEST);
-        add(bluePanel, BorderLayout.CENTER);
+        add(menuPanel, BorderLayout.WEST);
+        add(artPanel, BorderLayout.CENTER);
 
         setVisible(true);
+
+        startBtn.addActionListener(e -> main.showBattlePanel());
+        // leaderboardBtn.addActionListener(e -> main.leaderboardPanel);
+        // optionstBtn.addActionListener(e -> main.optionsPanel);
+        exittBtn.addActionListener(e -> main.showLogin());
+
     }
 }

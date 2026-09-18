@@ -1,5 +1,3 @@
-package src;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.awt.*;
@@ -13,7 +11,7 @@ public class Window {
     private final JPasswordField passwordField = new JPasswordField(20);
     private final JButton submitButton = new JButton("DETERMINATION");
 
-    private final ImageIcon logo = new ImageIcon(getClass().getResource("/resources/logo.png"));    // Placeholder, change this to your own art
+    private final ImageIcon logo = new ImageIcon(getClass().getResource("resources/logo.png"));    // Placeholder, change this to your own art
     private final JLabel label = new JLabel(logo);
 
     public Window() {
@@ -30,7 +28,7 @@ public class Window {
         styleInputField(passwordField);
         styleButton(submitButton);
 
-        Font undertaleFont = loadFont("/resources/8bitoperator.ttf", 24f);
+        Font undertaleFont = loadFont("resources/8bitoperator.ttf", 24f);
         JLabel usernameLabel = createLabel("USERNAME: ", undertaleFont);
         JLabel passwordLabel = createLabel("PASSWORD: ", undertaleFont);
 

@@ -1,11 +1,6 @@
-package src;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
-
-import static src.UIUtils.styleButton;
-import static src.UIUtils.loadFont;
 
 public class LoginPanel extends JPanel {
     
@@ -13,11 +8,11 @@ public class LoginPanel extends JPanel {
     private final JPasswordField passwordField = new JPasswordField(20);
     private final JButton submitButton = new JButton("DETERMINATION");
 
-    private final ImageIcon logo = new ImageIcon(getClass().getResource("/resources/logo.png"));    // Placeholder, change this to your own art
+    private final ImageIcon logo = new ImageIcon(getClass().getResource("resources/logo.png"));    // Placeholder, change this to your own art
     private final JLabel label = new JLabel(logo);
 
-    Font undertaleFont = loadFont("/resources/8bitoperator.ttf", 24f);
-    JLabel loginStatusLabel = createLabel("", undertaleFont);
+    ImageIcon sprite = new ImageIcon("resources/player_soul.png");
+    JLabel loginStatusLabel = UIUtils.createLabel("");
 
     private final Main main;
 
@@ -27,21 +22,25 @@ public class LoginPanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(Color.BLACK);
 
-        styleInputField(textField);
-        styleInputField(passwordField);
-        styleButton(submitButton);
+        UIUtils.styleInputField(textField);
+        UIUtils.styleInputField(passwordField);
+        UIUtils.styleButton(submitButton);
 
-        JLabel usernameLabel = createLabel("USERNAME: ", undertaleFont);
-        JLabel passwordLabel = createLabel("PASSWORD: ", undertaleFont);
+        JLabel usernameLabel = UIUtils.createLabel("USERNAME: ");
+        JLabel passwordLabel = UIUtils.createLabel("PASSWORD: ");
 
         JPanel userRow = createRow(usernameLabel, textField);
         JPanel passRow = createRow(passwordLabel, passwordField);
 
         label.setAlignmentX(CENTER_ALIGNMENT);
+        userRow.setAlignmentX(CENTER_ALIGNMENT);
+        passRow.setAlignmentX(CENTER_ALIGNMENT);
+        submitButton.setAlignmentX(CENTER_ALIGNMENT);
+
         add(label);
         
         add(userRow);
-        add(Box.createVerticalStrut(20));
+        add(Box.createVerticalStrut(5));
         add(passRow);
         
         add(Box.createVerticalStrut(20));
@@ -67,8 +66,8 @@ public class LoginPanel extends JPanel {
         try {
             if (username.equals("dom") && Arrays.equals("123".toCharArray(), password)) {
                 submitButton.setEnabled(false);
-                submitButton.setText("Logging In . . .");
-                loginStatusLabel.setText("LOGIN SUCCESSFUL!");
+                // submitButton.setText("Logging In . . .");
+                // loginStatusLabel.setText("LOGIN SUCCESSFUL!");
                 main.showMainMenu();
             } else {
                 loginStatusLabel.setText("LOGIN FAILED!");
@@ -78,29 +77,12 @@ public class LoginPanel extends JPanel {
         }
     }
 
-    private void styleInputField(JTextField field) {
-        field.setPreferredSize(new Dimension(200, 25));
-        field.setMaximumSize(new Dimension(200, 25));
-        field.setBackground(Color.BLACK);
-        field.setForeground(Color.WHITE);
-        field.setCaretColor(Color.WHITE);
-        field.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
-        field.setHorizontalAlignment(JTextField.CENTER);
-    }
-
-    private JLabel createLabel(String text, Font font) {
-        JLabel lbl = new JLabel(text);
-        lbl.setForeground(Color.WHITE);
-        lbl.setFont(font);
-        return lbl;
-    }
-
     private JPanel createRow(JLabel label, JTextField field) {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, 1, 0));
         row.setOpaque(false);
 
-        row.setPreferredSize(new Dimension(400, 30));
-        row.setMaximumSize(new Dimension(400, 30));
+        row.setPreferredSize(new Dimension(400, 45));
+        row.setMaximumSize(new Dimension(400, 45));
 
         row.add(label);
         row.add(field);
