@@ -8,6 +8,7 @@ import javax.swing.*;
     ShowMainMenu()
         Finish getting the buttons to work. *
         Remove temporary panels (red and blue panel) *
+        Exit button hits you with a hollow purple
 */
 
 /* =================
@@ -24,6 +25,13 @@ import javax.swing.*;
         Miku button (turns enemy character sprite into miku)
 */
 
+/* ================
+    Shit to fix:
+        Some functions in UIUtils need to be moved to
+        where they're used. Stylize button is only used inside
+        LoginPanel.
+*/
+
 public class Main extends JFrame {
 
     public Main() {
@@ -33,8 +41,8 @@ public class Main extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        showLogin();
-        // showMainMenu();
+        // showLogin();
+        showMainMenu();
         // showBattlePanel();
 
         setVisible(true);

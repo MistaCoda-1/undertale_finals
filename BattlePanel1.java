@@ -6,7 +6,7 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.util.Objects;
 
-public class BattlePanel extends JPanel implements KeyListener {
+public class BattlePanel1 extends JPanel implements KeyListener {
 
     // Player position
     int x = 100;
@@ -23,7 +23,7 @@ public class BattlePanel extends JPanel implements KeyListener {
 
     BufferedImage sprite;
 
-    public BattlePanel() {
+    public BattlePanel1() {
         try {
             sprite = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/resources/player_soul.png")));
         } catch (Exception e) {
@@ -127,7 +127,7 @@ public class BattlePanel extends JPanel implements KeyListener {
     public static void main(String[] args) {
 
         JFrame window = new JFrame("Simple Game");
-        BattlePanel game = new BattlePanel();
+        BattlePanel1 game = new BattlePanel1();
 
         window.add(game);
 
