@@ -1,7 +1,10 @@
+package battle;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
+
+import ui.Main;
 
 public class BattlePanel extends JPanel {
     enum BattleState {
@@ -22,7 +25,7 @@ public class BattlePanel extends JPanel {
     JPanel dialoguePanel = new JPanel(new BorderLayout());
     private FightMinigamePanel fightMinigame;
 
-    private final ImageIcon heartIcon = new ImageIcon(getClass().getResource("resources/player_soul.png"));
+    private final ImageIcon heartIcon = new ImageIcon(getClass().getResource("/resources/player_soul.png"));
 
     private final Main main;
 
@@ -32,7 +35,7 @@ public class BattlePanel extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.BLACK);
 
-        ImageIcon originalIcon = new ImageIcon(getClass().getResource("resources/enemy.png"));
+        ImageIcon originalIcon = new ImageIcon(getClass().getResource("/resources/enemy.png"));
         Image originalImage = originalIcon.getImage();
         Image scaledImage = originalImage.getScaledInstance(
                 250,

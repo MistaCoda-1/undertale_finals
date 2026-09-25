@@ -1,13 +1,8 @@
+package battle;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-/**
- * The timing-based "hit the middle" minigame that plays when the player
- * selects FIGHT. A line travels once across a bar; pressing SPACE locks it
- * in place and damage is scored by how close it landed to the center
- * marker. Letting it reach the far end without pressing SPACE is a miss.
- */
 public class FightMinigamePanel extends JPanel {
 
     public interface DamageListener {

@@ -1,10 +1,11 @@
+package ui;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 
 public final class UIUtils {
-    static Font undertaleFont = UIUtils.loadFont("8bitoperator-jve/8bitoperator_jve.ttf", 24f);
+    static Font undertaleFont = UIUtils.loadFont("/resources/8bitoperator-jve/8bitoperator_jve.ttf", 24f);
 
     private UIUtils() { }
 

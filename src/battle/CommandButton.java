@@ -1,7 +1,10 @@
+package battle;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+
+import ui.UIUtils;
 
 /**
  * A non-interactive, "statically drawn" stand-in for JButton, used for the

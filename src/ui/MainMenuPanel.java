@@ -1,3 +1,5 @@
+package ui;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -12,6 +14,7 @@ public class MainMenuPanel extends JPanel {
     private int selectedBtnIndex = 0;
     private MenuButton[] buttons;
     private Runnable[] menuActions;
+    private boolean leaderboardOpen = false;
 
     private final Main main;
 
@@ -27,8 +30,8 @@ public class MainMenuPanel extends JPanel {
 
         // == Uncomment/Comment to show bounds/panel borders == //
         btnPanel.setOpaque(false);
-        menuPanel.setOpaque(false);
-        artPanel.setOpaque(false);
+        // menuPanel.setOpaque(false);
+        // artPanel.setOpaque(false);
 
         menuPanel.setBackground(Color.RED);
         artPanel.setBackground(Color.BLUE);
@@ -52,10 +55,9 @@ public class MainMenuPanel extends JPanel {
                 exitBtn
         };
 
-        // index-matched with buttons[] — Z runs menuActions[selectedBtnIndex]
         menuActions = new Runnable[] {
                 main::showBattlePanel,
-                this::leaderboardPlaceholder,
+                this::showLeaderboard,
                 this::optionsPlaceholder,
                 main::showLogin
         };
@@ -88,6 +90,9 @@ public class MainMenuPanel extends JPanel {
         actionMap.put("moveUp", new AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
+                if (leaderboardOpen) {
+                    return;
+                }
                 selectedBtnIndex--;
                 if (selectedBtnIndex < 0) {
                     selectedBtnIndex = buttons.length - 1;
@@ -99,6 +104,9 @@ public class MainMenuPanel extends JPanel {
         actionMap.put("moveDown", new AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
+                if (leaderboardOpen) {
+                    return;
+                }
                 selectedBtnIndex++;
                 if (selectedBtnIndex > buttons.length - 1) {
                     selectedBtnIndex = 0;
@@ -110,6 +118,9 @@ public class MainMenuPanel extends JPanel {
         actionMap.put("select", new AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
+                if (leaderboardOpen) {
+                    return;
+                }
                 menuActions[selectedBtnIndex].run();
             }
         });
@@ -117,9 +128,25 @@ public class MainMenuPanel extends JPanel {
         setVisible(true);
     }
 
-    // LEADERBOARD/OPTIONS aren't implemented yet — these just fill the slots
-    // in menuActions so selecting them doesn't blow up.
-    private void leaderboardPlaceholder() { }
+    /** Opens the leaderboard as a glass-pane popup over the current menu. */
+    private void showLeaderboard() {
+        if (leaderboardOpen) {
+            return;
+        }
+        leaderboardOpen = true;
+
+        LeaderboardOverlay overlay = new LeaderboardOverlay(this::hideLeaderboard);
+        main.getRootPane().setGlassPane(overlay);
+        overlay.setVisible(true);
+        overlay.requestFocusInWindow();
+    }
+
+    /** Called by the overlay when X is pressed. */
+    private void hideLeaderboard() {
+        leaderboardOpen = false;
+        main.getRootPane().getGlassPane().setVisible(false);
+        requestFocusInWindow(); // hand keyboard control back to the menu
+    }
 
     private void optionsPlaceholder() { }
 

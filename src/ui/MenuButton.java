@@ -1,16 +1,7 @@
+package ui;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * A non-interactive, "statically drawn" stand-in for JButton, used for the
- * main menu (START / LEADERBOARD / OPTIONS / EXIT). No mouse listeners or
- * focus handling — MainMenuPanel is the only thing that changes its state,
- * via setSelected(), driven by keyboard navigation, so these can never be
- * clicked.
- *
- * Kept independent of UIUtils on purpose so it doesn't drag along the font
- * dependency if UIUtils ends up scoped down to LoginPanel only.
- */
 public class MenuButton extends JPanel {
 
     private final JLabel textLabel;
@@ -30,7 +21,6 @@ public class MenuButton extends JPanel {
         add(textLabel, BorderLayout.CENTER);
     }
 
-    /** Toggles selected look: yellow border/text when this entry is the current one. */
     public void setSelected(boolean selected) {
         this.selected = selected;
 

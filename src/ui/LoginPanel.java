@@ -1,3 +1,4 @@
+package ui;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
@@ -8,10 +9,9 @@ public class LoginPanel extends JPanel {
     private final JPasswordField passwordField = new JPasswordField(20);
     private final JButton submitButton = new JButton("DETERMINATION");
 
-    private final ImageIcon logo = new ImageIcon(getClass().getResource("resources/logo.png"));    // Placeholder, change this to your own art
+    private final ImageIcon logo = new ImageIcon(getClass().getResource("/resources/logo.png"));    // Placeholder, change this to your own art
     private final JLabel label = new JLabel(logo);
 
-    ImageIcon sprite = new ImageIcon("resources/player_soul.png");
     JLabel loginStatusLabel = UIUtils.createLabel("");
 
     private final Main main;
@@ -61,13 +61,9 @@ public class LoginPanel extends JPanel {
         String username = textField.getText().trim();
         char[] password = passwordField.getPassword();
 
-        // submitButton.setText("LOGGING IN . . .");
-
         try {
             if (username.equals("dom") && Arrays.equals("123".toCharArray(), password)) {
                 submitButton.setEnabled(false);
-                // submitButton.setText("Logging In . . .");
-                // loginStatusLabel.setText("LOGIN SUCCESSFUL!");
                 main.showMainMenu();
             } else {
                 loginStatusLabel.setText("LOGIN FAILED!");
