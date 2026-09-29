@@ -6,19 +6,6 @@ import java.awt.image.BufferedImage;
 
 import ui.UIUtils;
 
-/**
- * A non-interactive, "statically drawn" stand-in for JButton, used for the
- * FIGHT / ACT / ITEM / MERCY commands. It has no mouse listeners or focus
- * handling at all — BattlePanel is the only thing that changes its state,
- * via setSelected(), driven by keyboard navigation. That means these can
- * never be clicked, by construction, rather than by disabling JButton's
- * built-in behavior after the fact.
- *
- * Layout: command text on the left, an icon slot on the right. The icon
- * slot defaults to a blank placeholder the same size as the heart icon —
- * swap in a real per-command icon later with setCommandIcon(). Whichever
- * command is currently selected shows the heart in that slot instead.
- */
 public class CommandButton extends JPanel {
 
     private final JLabel textLabel;
@@ -35,10 +22,9 @@ public class CommandButton extends JPanel {
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(200, 40));
         setBackground(Color.BLACK);
-        setBorder(BorderFactory.createLineBorder(Color.ORANGE, 1));
 
         textLabel = UIUtils.createLabel(text);
-        textLabel.setBorder(new EmptyBorder(0, 0, 0, 12));
+        textLabel.setBorder(new EmptyBorder(0, 0, 0, 10));
 
         iconLabel = new JLabel(commandIcon);
         iconLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
@@ -59,9 +45,9 @@ public class CommandButton extends JPanel {
     public void setSelected(boolean selected) {
         this.selected = selected;
 
-        Color highlight = selected ? Color.YELLOW : Color.WHITE;
+        Color highlight = selected ? Color.YELLOW : new Color(224, 132, 66);
         textLabel.setForeground(highlight);
-        setBorder(BorderFactory.createLineBorder(highlight, 1));
+        setBorder(BorderFactory.createLineBorder(highlight, 3));
 
         iconLabel.setIcon(selected ? heartIcon : commandIcon);
     }

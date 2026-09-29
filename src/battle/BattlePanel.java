@@ -1,10 +1,12 @@
 package battle;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 
 import ui.Main;
+import ui.UIUtils; // Import your utility package
 
 public class BattlePanel extends JPanel {
     enum BattleState {
@@ -20,12 +22,24 @@ public class BattlePanel extends JPanel {
     private Runnable[] commandActions;
 
     JPanel btnPanel = new JPanel(new GridLayout(1, 4, 20, 0));
-    JPanel enemyPanel = new JPanel();
+    EnemyBG enemyPanel = new EnemyBG(new Color(0, 255, 60), 70);
     JPanel dialogueContainer = new JPanel(new BorderLayout());
     JPanel dialoguePanel = new JPanel(new BorderLayout());
     private FightMinigamePanel fightMinigame;
 
     private final ImageIcon heartIcon = new ImageIcon(getClass().getResource("/resources/player_soul.png"));
+
+    // == Roguelike Floor & Player Stats ==
+    private String playerName = "DOM";
+    private int currentLvl = 1;
+    private int currentHp = 20;
+    private int maxHp = 20;
+    private final int totalGameLvl = 15;
+
+    // UI Status Components ==
+    private JLabel statsTextLabel;
+    private JPanel hpBarGraphic;
+    private JLabel hpNumericLabel;
 
     private final Main main;
 
@@ -42,10 +56,19 @@ public class BattlePanel extends JPanel {
                 250,
                 Image.SCALE_SMOOTH);
         JLabel enemySprite = new JLabel(new ImageIcon(scaledImage));
-        enemyPanel.setPreferredSize(new Dimension(300, 300));
+
+        enemyPanel.setPreferredSize(new Dimension(420, 280));
+        enemyPanel.setLayout(new GridBagLayout());
+        enemyPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        JPanel enemyCenteringWrapper = new JPanel(new GridBagLayout());
+        enemyCenteringWrapper.setBackground(Color.BLACK);
+        enemyCenteringWrapper.setBorder(new EmptyBorder(25, 0, 10, 0));
+        enemyCenteringWrapper.add(enemyPanel);
+
         enemyPanel.add(enemySprite);
 
-        dialogueContainer.setBorder(new EmptyBorder(20, 20, 20, 20));
+        dialogueContainer.setBorder(new EmptyBorder(10, 25, 10, 25));
 
         dialoguePanel.setBackground(Color.BLACK);
         dialoguePanel.setBorder(BorderFactory.createCompoundBorder(
@@ -54,20 +77,24 @@ public class BattlePanel extends JPanel {
 
         dialogueContainer.add(dialoguePanel, BorderLayout.CENTER);
 
+        // FIX: Styled dialogue label text using your helper font setup
         JLabel dialogueLabel = new JLabel("...");
         dialogueLabel.setForeground(Color.WHITE);
         dialogueLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Dynamically loads the loaded ttf file configuration directly into the text
+        // element
+        Font gameFont = UIUtils.loadFont("/resources/8bitoperator-jve/8bitoperator_jve.ttf", 24f);
+        dialogueLabel.setFont(gameFont);
         dialoguePanel.add(dialogueLabel, BorderLayout.CENTER);
 
-        btnPanel.setPreferredSize(new Dimension(300, 80));
+        btnPanel.setPreferredSize(new Dimension(300, 75));
 
-        // == PANEL COLORS FOR DEBUGGING == //
-        // Set all to black when done.
-        enemyPanel.setBackground(Color.red);
-        dialogueContainer.setBackground(Color.green);
-        btnPanel.setBackground(Color.blue);
+        enemyPanel.setBackground(Color.black);
+        dialogueContainer.setBackground(Color.black);
+        btnPanel.setBackground(Color.black);
 
-        btnPanel.setBorder(new EmptyBorder(15, 20, 15, 20));
+        btnPanel.setBorder(new EmptyBorder(5, 25, 20, 25));
 
         CommandButton fightBtn = new CommandButton("FIGHT", heartIcon);
         CommandButton actBtn = new CommandButton("ACT", heartIcon);
@@ -81,7 +108,6 @@ public class BattlePanel extends JPanel {
                 mercyBtn
         };
 
-        // index-matched with buttons[] — Z runs commandActions[selectedBtnIndex]
         commandActions = new Runnable[] {
                 this::startFightSequence,
                 this::actPlaceholder,
@@ -94,9 +120,15 @@ public class BattlePanel extends JPanel {
         btnPanel.add(itemBtn);
         btnPanel.add(mercyBtn);
 
-        add(enemyPanel, BorderLayout.NORTH);
+        JPanel lowerWrapper = new JPanel(new BorderLayout());
+        lowerWrapper.setBackground(Color.BLACK);
+
+        lowerWrapper.add(createStatusBar(), BorderLayout.NORTH);
+        lowerWrapper.add(btnPanel, BorderLayout.SOUTH);
+
+        add(enemyCenteringWrapper, BorderLayout.NORTH);
         add(dialogueContainer, BorderLayout.CENTER);
-        add(btnPanel, BorderLayout.SOUTH);
+        add(lowerWrapper, BorderLayout.SOUTH);
 
         updateSelection();
 
@@ -134,7 +166,6 @@ public class BattlePanel extends JPanel {
             }
         });
 
-        // Z confirms whichever command is currently selected
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, 0), "select");
         actionMap.put("select", new AbstractAction() {
             @Override
@@ -149,17 +180,74 @@ public class BattlePanel extends JPanel {
         setVisible(true);
     }
 
-    /**
-     * Swaps the dialogue box's contents (not the box itself) for the timing
-     * minigame. Guarded by state so mashing FIGHT mid-minigame can't stack
-     * multiple minigames on top of each other.
-     */
+    private JPanel createStatusBar() {
+        JPanel statusBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        statusBar.setBackground(Color.BLACK);
+        statusBar.setBorder(BorderFactory.createEmptyBorder(10, 25, 5, 25));
+
+        // Load baseline custom font engine rule
+        Font statusFont = UIUtils.loadFont("/resources/8bitoperator-jve/8bitoperator_jve.ttf", 24f);
+
+        // 1. Setup Main Stats Text
+        statsTextLabel = new JLabel(playerName + "   LEVEL " + currentLvl + "/" + totalGameLvl + "    ");
+        statsTextLabel.setFont(statusFont);
+        statsTextLabel.setForeground(Color.WHITE);
+
+        // 2. Setup "HP" marker text (Slightly smaller size scale for aesthetic
+        // accuracy)
+        JLabel hpMarker = new JLabel("HP  ");
+        hpMarker.setFont(statusFont.deriveFont(Font.BOLD, 14f));
+        hpMarker.setForeground(Color.WHITE);
+
+        // 3. Render Status Canvas Blocks
+        hpBarGraphic = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                double hpPercentage = (double) currentHp / maxHp;
+                int coloredWidth = (int) (getWidth() * hpPercentage);
+
+                g.setColor(Color.RED);
+                g.fillRect(0, 0, getWidth(), getHeight());
+
+                g.setColor(Color.YELLOW);
+                g.fillRect(0, 0, coloredWidth, getHeight());
+            }
+        };
+        hpBarGraphic.setPreferredSize(new Dimension(110, 20));
+        hpBarGraphic.setBackground(Color.BLACK);
+
+        // 4. Setup Fraction Label Text
+        hpNumericLabel = new JLabel("   " + currentHp + " / " + maxHp);
+        hpNumericLabel.setFont(statusFont);
+        hpNumericLabel.setForeground(Color.WHITE);
+
+        statusBar.add(statsTextLabel);
+        statusBar.add(hpMarker);
+        statusBar.add(hpBarGraphic);
+        statusBar.add(hpNumericLabel);
+
+        return statusBar;
+    }
+
+    public void updatePlayerStats(int newHp, int level) {
+        this.currentHp = Math.clamp(newHp, 0, maxHp);
+        this.currentLvl = Math.clamp(level, 1, totalGameLvl);
+
+        if (statsTextLabel != null && hpNumericLabel != null && hpBarGraphic != null) {
+            Font currentFont = statsTextLabel.getFont();
+            statsTextLabel.setText(playerName + "   LEVEL " + currentLvl + "/" + totalGameLvl + "    ");
+            hpNumericLabel.setText("   " + currentHp + " / " + maxHp);
+            hpBarGraphic.repaint();
+        }
+    }
+
     private void startFightSequence() {
         if (state != BattleState.PLAYER_TURN) {
             return;
         }
         state = BattleState.FIGHT_MINIGAME;
-        clearSelectionIcons(); // hide the heart so it's clear the menu isn't active
+        clearSelectionIcons();
 
         dialoguePanel.removeAll();
         fightMinigame = new FightMinigamePanel(this::onFightDamageDealt);
@@ -171,37 +259,48 @@ public class BattlePanel extends JPanel {
         fightMinigame.start();
     }
 
-    // ACT/ITEM/MERCY aren't implemented yet — these just fill the slots in
-    // commandActions so selecting them doesn't blow up.
-    private void actPlaceholder() { }
+    private void actPlaceholder() {
+    }
 
-    private void itemPlaceholder() { }
+    private void itemPlaceholder() {
+    }
 
-    private void mercyPlaceholder() { }
+    private void mercyPlaceholder() {
+    }
 
-    /** Called once the player locks in their hit; briefly shows the result, then starts the battle. */
     private void onFightDamageDealt(int damage) {
         Timer resultPause = new Timer(1200, e -> showBattleBox());
         resultPause.setRepeats(false);
         resultPause.start();
     }
 
-    /**
-     * Shrinks the dialogue area down into the battle box with the player's
-     * soul centered inside. Bullet patterns / enemy attacks come later —
-     * this just lays down where that will live.
-     */
     private void showBattleBox() {
+        int currentWidth = dialogueContainer.getWidth();
+        int currentHeight = dialogueContainer.getHeight();
+
+        dialogueContainer.removeAll();
+
+        AnimateBox animator = new AnimateBox(currentWidth, currentHeight, 300, 250, () -> {
+            finalizeBattleBox(300, 250);
+        });
+
+        dialogueContainer.add(animator, BorderLayout.CENTER);
+        dialogueContainer.revalidate();
+        dialogueContainer.repaint();
+        animator.startAnimation();
+    }
+
+    private void finalizeBattleBox(int width, int height) {
         dialogueContainer.removeAll();
 
         JPanel battleBox = new JPanel(null);
         battleBox.setBackground(Color.BLACK);
         battleBox.setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
-        battleBox.setPreferredSize(new Dimension(300, 250));
+        battleBox.setPreferredSize(new Dimension(width, height));
 
         JLabel heartLabel = new JLabel(heartIcon);
-        int heartX = (300 - heartIcon.getIconWidth()) / 2;
-        int heartY = (250 - heartIcon.getIconHeight()) / 2;
+        int heartX = (width - heartIcon.getIconWidth()) / 2;
+        int heartY = (height - heartIcon.getIconHeight()) / 2;
         heartLabel.setBounds(heartX, heartY, heartIcon.getIconWidth(), heartIcon.getIconHeight());
         battleBox.add(heartLabel);
 
@@ -213,6 +312,8 @@ public class BattlePanel extends JPanel {
         dialogueContainer.revalidate();
         dialogueContainer.repaint();
 
+        requestFocusInWindow();
+
         state = BattleState.ENEMY_TURN;
     }
 
@@ -222,7 +323,6 @@ public class BattlePanel extends JPanel {
         }
     }
 
-    /** Blanks the heart off every command button so the menu reads as inactive. */
     private void clearSelectionIcons() {
         for (CommandButton button : buttons) {
             button.setSelected(false);

@@ -37,7 +37,9 @@ public class Main extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        showLogin();
+        // showLogin();
+        // showMainMenu();
+        showBattlePanel();
 
         setVisible(true);
     }

@@ -13,7 +13,7 @@ public class FightMinigamePanel extends JPanel {
     private static final int BAR_HEIGHT = 20;
     private static final int TARGET_WIDTH = 30;
     private static final int MAX_DAMAGE = 20;
-    private static final int BAR_Y = 110;
+    private static final int BAR_Y = 100;
 
     private final Timer tickTimer;
     private final DamageListener listener;
@@ -51,7 +51,6 @@ public class FightMinigamePanel extends JPanel {
         });
     }
 
-    /** Resets and starts the needle moving. Call this when the FIGHT panel is shown. */
     public void start() {
         locked = false;
         lastDamage = 0;
