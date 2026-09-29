@@ -31,7 +31,7 @@ import battle.BattlePanel;
 public class Main extends JFrame {
 
     public Main() {
-        setTitle("UNDERTALEEEEE");
+        setTitle("Undertale Mock Up");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1000, 750);
         setLocationRelativeTo(null);
