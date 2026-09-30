@@ -29,6 +29,8 @@ public class BattlePanel extends JPanel {
 
     private final ImageIcon heartIcon = new ImageIcon(getClass().getResource("/resources/player_soul.png"));
 
+    Font gameFont = UIUtils.undertaleFont;
+
     // == Roguelike Floor & Player Stats ==
     private String playerName = "DOM";
     private int currentLvl = 1;
@@ -84,7 +86,6 @@ public class BattlePanel extends JPanel {
 
         // Dynamically loads the loaded ttf file configuration directly into the text
         // element
-        Font gameFont = UIUtils.loadFont("/resources/8bitoperator-jve/8bitoperator_jve.ttf", 24f);
         dialogueLabel.setFont(gameFont);
         dialoguePanel.add(dialogueLabel, BorderLayout.CENTER);
 
@@ -186,17 +187,16 @@ public class BattlePanel extends JPanel {
         statusBar.setBorder(BorderFactory.createEmptyBorder(10, 25, 5, 25));
 
         // Load baseline custom font engine rule
-        Font statusFont = UIUtils.loadFont("/resources/8bitoperator-jve/8bitoperator_jve.ttf", 24f);
 
         // 1. Setup Main Stats Text
         statsTextLabel = new JLabel(playerName + "   LEVEL " + currentLvl + "/" + totalGameLvl + "    ");
-        statsTextLabel.setFont(statusFont);
+        statsTextLabel.setFont(gameFont);
         statsTextLabel.setForeground(Color.WHITE);
 
         // 2. Setup "HP" marker text (Slightly smaller size scale for aesthetic
         // accuracy)
         JLabel hpMarker = new JLabel("HP  ");
-        hpMarker.setFont(statusFont.deriveFont(Font.BOLD, 14f));
+        hpMarker.setFont(gameFont.deriveFont(Font.BOLD, 14f));
         hpMarker.setForeground(Color.WHITE);
 
         // 3. Render Status Canvas Blocks
@@ -219,7 +219,7 @@ public class BattlePanel extends JPanel {
 
         // 4. Setup Fraction Label Text
         hpNumericLabel = new JLabel("   " + currentHp + " / " + maxHp);
-        hpNumericLabel.setFont(statusFont);
+        hpNumericLabel.setFont(gameFont);
         hpNumericLabel.setForeground(Color.WHITE);
 
         statusBar.add(statsTextLabel);
@@ -293,28 +293,25 @@ public class BattlePanel extends JPanel {
     private void finalizeBattleBox(int width, int height) {
         dialogueContainer.removeAll();
 
-        JPanel battleBox = new JPanel(null);
-        battleBox.setBackground(Color.BLACK);
-        battleBox.setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
-        battleBox.setPreferredSize(new Dimension(width, height));
+        // Instantiate the isolated standalone battle arena component panel
+        ArenaPanel arena = new ArenaPanel(width, height, heartIcon, () -> {
+            // This is the callback blueprint slot for when an enemy's bullet pattern timer expires later
+            System.out.println("Enemy attack turn over!");
+        });
 
-        JLabel heartLabel = new JLabel(heartIcon);
-        int heartX = (width - heartIcon.getIconWidth()) / 2;
-        int heartY = (height - heartIcon.getIconHeight()) / 2;
-        heartLabel.setBounds(heartX, heartY, heartIcon.getIconWidth(), heartIcon.getIconHeight());
-        battleBox.add(heartLabel);
-
+        // Use GridBagLayout wrapper to maintain perfect centering alignment configurations
         JPanel centeringWrapper = new JPanel(new GridBagLayout());
         centeringWrapper.setOpaque(false);
-        centeringWrapper.add(battleBox);
+        centeringWrapper.add(arena);
 
         dialogueContainer.add(centeringWrapper, BorderLayout.CENTER);
         dialogueContainer.revalidate();
         dialogueContainer.repaint();
 
-        requestFocusInWindow();
-
         state = BattleState.ENEMY_TURN;
+        
+        // Hand game loop control cleanly over to your custom Arena container box
+        arena.startTurn();
     }
 
     private void updateSelection() {

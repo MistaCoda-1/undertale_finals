@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public final class UIUtils {
-    static Font undertaleFont = UIUtils.loadFont("/resources/8bitoperator-jve/8bitoperator_jve.ttf", 24f);
+    public static Font undertaleFont = UIUtils.loadFont("/resources/8bitoperator-jve/8bitoperator_jve.ttf", 24f);
 
     private UIUtils() { }
 

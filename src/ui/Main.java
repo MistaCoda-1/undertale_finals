@@ -5,6 +5,7 @@ import battle.BattlePanel;
 
 // ==========================================
 // You were working on:
+//      Gameplay mechs
 //      Options
 
 /* =================

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class LeaderboardPanel extends JPanel {
-    Font undertaleFont = UIUtils.loadFont("/resources/8bitoperator-jve/8bitoperator_jve.ttf", 24f);
+    Font gameFont = UIUtils.undertaleFont;
     private static final int TOP_LIMIT = 10;
 
     private final JPanel tablePanel = new JPanel(new GridBagLayout());
@@ -26,7 +26,7 @@ public class LeaderboardPanel extends JPanel {
 
         JLabel title = new JLabel("LEADERBOARD", SwingConstants.CENTER);
         title.setForeground(Color.WHITE);
-        title.setFont(undertaleFont);
+        title.setFont(gameFont);
         title.setBorder(new EmptyBorder(0, 0, 15, 0));
         add(title, BorderLayout.NORTH);
 
@@ -35,7 +35,7 @@ public class LeaderboardPanel extends JPanel {
 
         JLabel returnLabel = new JLabel("Press X to return to Main Menu", SwingConstants.CENTER);
         returnLabel.setForeground(Color.LIGHT_GRAY);
-        returnLabel.setFont(undertaleFont);
+        returnLabel.setFont(gameFont);
         returnLabel.setBorder(new EmptyBorder(15, 0, 0, 0));
         add(returnLabel, BorderLayout.SOUTH);
 
@@ -107,7 +107,7 @@ public class LeaderboardPanel extends JPanel {
     private void addCell(String text, int col, int row, double weightX, int align, Color color) {
         JLabel label = new JLabel(text, align);
         label.setForeground(color);
-        label.setFont(undertaleFont);
+        label.setFont(gameFont);
         label.setBorder(new EmptyBorder(4, 0, 4, 0));
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -121,7 +121,7 @@ public class LeaderboardPanel extends JPanel {
     private void addSpanningMessage(int row, String message) {
         JLabel label = new JLabel(message, SwingConstants.CENTER);
         label.setForeground(Color.LIGHT_GRAY);
-        label.setFont(undertaleFont);
+        label.setFont(gameFont);
         label.setBorder(new EmptyBorder(20, 0, 0, 0));
 
         GridBagConstraints gbc = new GridBagConstraints();
