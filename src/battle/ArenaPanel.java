@@ -3,6 +3,9 @@ package battle;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.function.IntConsumer;
+
+import battle.bullets.*;
 
 public class ArenaPanel extends JPanel {
     private final Image heartImage; 
@@ -18,12 +21,18 @@ public class ArenaPanel extends JPanel {
     private boolean moveUp, moveDown, moveLeft, moveRight;
     private boolean focusActive;
     
+    private final IntConsumer onPlayerHit;
     private final Runnable onTurnEnd;
 
-    public ArenaPanel(int width, int height, ImageIcon heartIcon, Runnable onTurnEnd) {
+    private BulletPattern pattern;
+    private static final int INVINCIBILITY_TICKS = 30; // ~0.7s at a 16ms tick
+    private int invincibleTicks = 0;
+
+    public ArenaPanel(int width, int height, ImageIcon heartIcon, IntConsumer onPlayerHit, Runnable onTurnEnd) {
         this.heartImage = heartIcon.getImage();
         this.heartWidth = heartIcon.getIconWidth();
         this.heartHeight = heartIcon.getIconHeight();
+        this.onPlayerHit = onPlayerHit;
         this.onTurnEnd = onTurnEnd;
 
         setBackground(Color.BLACK);
@@ -40,14 +49,29 @@ public class ArenaPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g); // Clear screen and draws the background/border
-        
-        g.drawImage(heartImage, soulX, soulY, heartWidth, heartHeight, this);
+
+        if (pattern != null) {
+            for (Bullet bullet : pattern.getBullets()) {
+                g.setColor(bullet.color);
+                g.fillRect((int) bullet.x, (int) bullet.y, bullet.width, bullet.height);
+            }
+        }
+
+        // simple invincibility flicker: skip drawing the heart every few ticks while it's active
+        boolean drawHeart = invincibleTicks <= 0 || (invincibleTicks / 4) % 2 == 0;
+        if (drawHeart) {
+            g.drawImage(heartImage, soulX, soulY, heartWidth, heartHeight, this);
+        }
     }
 
-    public void startTurn() {
+    /** Starts the dodge phase, running the given bullet pattern until it's over. */
+    public void startTurn(BulletPattern pattern) {
         if (gameLoopTimer != null && gameLoopTimer.isRunning()) {
             return;
         }
+
+        this.pattern = pattern;
+        invincibleTicks = 0;
 
         gameLoopTimer = new Timer(16, e -> {
             double dx = 0;
@@ -74,18 +98,51 @@ public class ArenaPanel extends JPanel {
             soulX = Math.clamp(soulX, 3, maxW);
             soulY = Math.clamp(soulY, 3, maxH);
 
-            repaint(); 
+            this.pattern.update();
+            checkCollisions();
+
+            if (this.pattern.isOver()) {
+                endTurn();
+                if (onTurnEnd != null) {
+                    onTurnEnd.run();
+                }
+                return;
+            }
+
+            repaint();
         });
 
         gameLoopTimer.start();
         requestFocusInWindow();
     }
 
+    /** Heart-vs-bullet collision, with a short invincibility window after each hit. */
+    private void checkCollisions() {
+        if (invincibleTicks > 0) {
+            invincibleTicks--;
+            return;
+        }
+
+        // hitbox is a little smaller than the sprite, same idea as Undertale's forgiving hit detection
+        Rectangle heartBounds = new Rectangle(soulX + 4, soulY + 4, heartWidth - 8, heartHeight - 8);
+
+        for (Bullet bullet : pattern.getBullets()) {
+            if (heartBounds.intersects(bullet.getBounds())) {
+                if (onPlayerHit != null) {
+                    onPlayerHit.accept(bullet.damage);
+                }
+                invincibleTicks = INVINCIBILITY_TICKS;
+                break; // only one hit per tick, even if multiple bullets overlap
+            }
+        }
+    }
+
     public void endTurn() {
         if (gameLoopTimer != null) {
             gameLoopTimer.stop();
         }
-        moveUp = moveDown = moveLeft = moveRight = focusActive = false; 
+        moveUp = moveDown = moveLeft = moveRight = focusActive = false;
+        pattern = null;
     }
 
     private void setupInputMappings() {

@@ -23,7 +23,7 @@ public class EnemyBG extends JPanel {
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(gridColor);
-        g2d.setStroke(new BasicStroke(2));
+        g2d.setStroke(new BasicStroke(1));
 
         for (int x = cellSize; x < getWidth(); x += cellSize) {
             g2d.drawLine(x, 0, x, getHeight());

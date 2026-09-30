@@ -8,6 +8,8 @@ import java.awt.event.*;
 import ui.Main;
 import ui.UIUtils;
 
+import battle.bullets.*;
+
 public class BattlePanel extends JPanel {
     enum BattleState {
         PLAYER_TURN,
@@ -26,6 +28,7 @@ public class BattlePanel extends JPanel {
     JPanel dialogueContainer = new JPanel(new BorderLayout());
     JPanel dialoguePanel = new JPanel(new BorderLayout());
 
+    private JLabel dialogueLabel;
     private FightMinigamePanel fightMinigame;
 
     private final ImageIcon heartIcon = new ImageIcon(getClass().getResource("/resources/player_soul.png"));
@@ -78,13 +81,12 @@ public class BattlePanel extends JPanel {
 
         dialogueContainer.add(dialoguePanel, BorderLayout.CENTER);
 
-        JLabel dialogueLabel = new JLabel("'SEEEEKAAAAAAIIII DEEEEEE!!!'");
+        dialogueLabel = new JLabel("'SEEEEKAAAAAAIIII DEEEEEE!!!'");
         dialogueLabel.setForeground(Color.WHITE);
         dialogueLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         dialogueLabel.setFont(gameFont);
         dialoguePanel.add(dialogueLabel, BorderLayout.CENTER);
-
         btnPanel.setPreferredSize(new Dimension(300, 75));
 
         enemyPanel.setBackground(Color.black);
@@ -230,10 +232,9 @@ public class BattlePanel extends JPanel {
     private void finalizeBattleBox(int width, int height) {
         dialogueContainer.removeAll();
 
-        ArenaPanel arena = new ArenaPanel(width, height, heartIcon, () -> {
-            // This is the callback blueprint slot for when an enemy's bullet pattern timer expires later
-            System.out.println("Enemy attack turn over!");  // Remove for finalization
-        });
+        ArenaPanel arena = new ArenaPanel(width, height, heartIcon,
+                this::onPlayerHit,
+                this::returnToPlayerTurn);
 
         // Use GridBagLayout wrapper to maintain perfect centering alignment configurations
         JPanel centeringWrapper = new JPanel(new GridBagLayout());
@@ -245,8 +246,32 @@ public class BattlePanel extends JPanel {
         dialogueContainer.repaint();
 
         state = BattleState.ENEMY_TURN;
-        
-        arena.startTurn();
+
+        // TODO: pick a pattern (or sequence of patterns) per enemy/floor once there's more than one
+        BulletPattern pattern = new BulletRain(width, height);
+        arena.startTurn(pattern);
+    }
+
+    /** Called by ArenaPanel whenever the heart takes a hit during the bullet phase. */
+    private void onPlayerHit(int damage) {
+        updatePlayerStats(currentHp - damage, currentLvl);
+    }
+
+    /**
+     * Called once the bullet pattern finishes — closes the loop back to the
+     * command menu: restores the dialogue box and re-enables FIGHT/ACT/ITEM/MERCY.
+     */
+    private void returnToPlayerTurn() {
+        dialogueContainer.removeAll();
+        dialoguePanel.removeAll();
+        dialoguePanel.add(dialogueLabel, BorderLayout.CENTER);
+        dialogueContainer.add(dialoguePanel, BorderLayout.CENTER);
+
+        dialogueContainer.revalidate();
+        dialogueContainer.repaint();
+
+        state = BattleState.PLAYER_TURN;
+        updateSelection(); // restores the heart on whichever command is currently selected
     }
 
     // GUI Functionalities

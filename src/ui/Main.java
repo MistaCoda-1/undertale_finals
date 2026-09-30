@@ -5,6 +5,7 @@ import battle.BattlePanel;
 
 // ==========================================
 // You were working on: #1
+//      Move EnemyPanel to different file
 //      Gameplay mechs
 //      Options
 //      Completely Revamp Login Page to add registration
@@ -51,8 +52,8 @@ public class Main extends JFrame {
         setResizable(false);
 
         // showLogin();
-        showMainMenu();
-        // showBattlePanel();
+        // showMainMenu();
+        showBattlePanel();
 
         setVisible(true);
     }

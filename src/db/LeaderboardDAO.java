@@ -19,7 +19,7 @@ public class LeaderboardDAO {
             "UPDATE players SET level = ? "
             + "WHERE username = ? AND level < ?";
 
-    /** Returns up to `limit` players, best first, with ranks 1..n filled in. */
+    // Returns up to `limit` players, best first, with ranks 1..n filled in.
     public List<LeaderboardEntry> getTopPlayers(int limit) throws SQLException {
         List<LeaderboardEntry> entries = new ArrayList<>();
 
@@ -41,7 +41,7 @@ public class LeaderboardDAO {
         return entries;
     }
 
-    /** Not called anywhere yet — for when a run ends and a new best should be saved. */
+    // Not called anywhere yet — for when a run ends and a new best should be saved.
     public void updateHighestLevel(String username, int level) throws SQLException {
         try (Connection conn = Database.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(UPDATE_HIGHEST_LEVEL_SQL)) {
