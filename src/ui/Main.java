@@ -4,12 +4,13 @@ import javax.swing.*;
 import battle.BattlePanel;
 
 // ==========================================
-// You were working on:
+// You were working on: #1
 //      Gameplay mechs
 //      Options
+//      Completely Revamp Login Page to add registration
 
 /* =================
-    More things to do:
+    More things to do: #2
         Create background art for blue panel area
         Create art for logo
         Create art for app icon
@@ -17,30 +18,41 @@ import battle.BattlePanel;
 */
 
 /* ================
-    Random shit to add:
+    Small Fixes: #3
+        BattlePanel.java l.35
+        BattlePanel.java l.287
+*/
+
+/* ================
+    Random shit to add: #4
         Miku miku beam button
         Miku button (turns enemy character sprite into miku)
 */
 
 /* ================
-    Shit to fix:
-        Some functions in UIUtils need to be moved to
-        where they're used. Stylize button is only used inside
-        LoginPanel.
+    Complete/Done files:
+        AnimatBox.java
+        EnemyBG.java
+        CommandButton.java
+        LeaderboardEntry.java
+        LeaderboardOverlay.java
+        LeaderboardPanel.java
+        MenuButton.java
+        UIUtils.java
 */
 
 public class Main extends JFrame {
 
     public Main() {
-        setTitle("Undertale Mock Up");
+        setTitle("HeartBreak!");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1000, 750);
         setLocationRelativeTo(null);
         setResizable(false);
 
         // showLogin();
-        // showMainMenu();
-        showBattlePanel();
+        showMainMenu();
+        // showBattlePanel();
 
         setVisible(true);
     }

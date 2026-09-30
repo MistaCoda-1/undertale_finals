@@ -21,30 +21,26 @@ public class ArenaPanel extends JPanel {
     private final Runnable onTurnEnd;
 
     public ArenaPanel(int width, int height, ImageIcon heartIcon, Runnable onTurnEnd) {
-        // Extract the raw image and its dimensions cleanly
         this.heartImage = heartIcon.getImage();
         this.heartWidth = heartIcon.getIconWidth();
         this.heartHeight = heartIcon.getIconHeight();
         this.onTurnEnd = onTurnEnd;
 
-        // No layout or child components needed anymore!
         setBackground(Color.BLACK);
         setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
         setPreferredSize(new Dimension(width, height));
 
-        // Initial positions remain identical
+        // Center player
         soulX = (width - heartWidth) / 2;
         soulY = (height - heartHeight) / 2;
 
         setupInputMappings();
     }
 
-    // 2. Add the custom paint method to draw the soul manually
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g); // Clears the screen and draws the background/border
+        super.paintComponent(g); // Clear screen and draws the background/border
         
-        // Draw the heart at its active pixel position
         g.drawImage(heartImage, soulX, soulY, heartWidth, heartHeight, this);
     }
 
@@ -72,14 +68,12 @@ public class ArenaPanel extends JPanel {
             soulX += (int) Math.round(dx * activeSpeed);
             soulY += (int) Math.round(dy * activeSpeed);
 
-            // Bounding collision checks updated with standard integers
             int maxW = getWidth() - heartWidth - 3;
             int maxH = getHeight() - heartHeight - 3;
 
             soulX = Math.clamp(soulX, 3, maxW);
             soulY = Math.clamp(soulY, 3, maxH);
 
-            // 3. Swap .setBounds() for repaint() to request an optimized frame update
             repaint(); 
         });
 

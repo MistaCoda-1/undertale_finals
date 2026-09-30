@@ -6,7 +6,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import ui.Main;
-import ui.UIUtils; // Import your utility package
+import ui.UIUtils;
 
 public class BattlePanel extends JPanel {
     enum BattleState {
@@ -25,14 +25,14 @@ public class BattlePanel extends JPanel {
     EnemyBG enemyPanel = new EnemyBG(new Color(0, 255, 60), 70);
     JPanel dialogueContainer = new JPanel(new BorderLayout());
     JPanel dialoguePanel = new JPanel(new BorderLayout());
+
     private FightMinigamePanel fightMinigame;
 
     private final ImageIcon heartIcon = new ImageIcon(getClass().getResource("/resources/player_soul.png"));
-
     Font gameFont = UIUtils.undertaleFont;
 
     // == Roguelike Floor & Player Stats ==
-    private String playerName = "DOM";
+    private String playerName = "DOM";  // Change to take from DB
     private int currentLvl = 1;
     private int currentHp = 20;
     private int maxHp = 20;
@@ -44,7 +44,6 @@ public class BattlePanel extends JPanel {
     private JLabel hpNumericLabel;
 
     private final Main main;
-
     public BattlePanel(Main main) {
         this.main = main;
 
@@ -79,13 +78,10 @@ public class BattlePanel extends JPanel {
 
         dialogueContainer.add(dialoguePanel, BorderLayout.CENTER);
 
-        // FIX: Styled dialogue label text using your helper font setup
-        JLabel dialogueLabel = new JLabel("...");
+        JLabel dialogueLabel = new JLabel("'SEEEEKAAAAAAIIII DEEEEEE!!!'");
         dialogueLabel.setForeground(Color.WHITE);
         dialogueLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        // Dynamically loads the loaded ttf file configuration directly into the text
-        // element
         dialogueLabel.setFont(gameFont);
         dialoguePanel.add(dialogueLabel, BorderLayout.CENTER);
 
@@ -138,6 +134,7 @@ public class BattlePanel extends JPanel {
 
         inputMap.put(KeyStroke.getKeyStroke("LEFT"), "moveLeft");
         inputMap.put(KeyStroke.getKeyStroke("RIGHT"), "moveRight");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, 0), "select");
 
         actionMap.put("moveLeft", new AbstractAction() {
             @Override
@@ -167,7 +164,6 @@ public class BattlePanel extends JPanel {
             }
         });
 
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, 0), "select");
         actionMap.put("select", new AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -181,25 +177,92 @@ public class BattlePanel extends JPanel {
         setVisible(true);
     }
 
+
+    private void actPlaceholder() {
+    }
+
+    private void itemPlaceholder() {
+    }
+
+    private void mercyPlaceholder() {
+    }
+
+    // Battle functionalities
+    private void startFightSequence() {
+        if (state != BattleState.PLAYER_TURN) {
+            return;
+        }
+        state = BattleState.FIGHT_MINIGAME;
+        clearSelectionIcons();
+
+        dialoguePanel.removeAll();
+        fightMinigame = new FightMinigamePanel(this::onHitEnemy);
+        dialoguePanel.add(fightMinigame, BorderLayout.CENTER);
+
+        dialoguePanel.revalidate();
+        dialoguePanel.repaint();
+
+        fightMinigame.start();
+    }
+
+    private void onHitEnemy(int damage) {
+        Timer resultPause = new Timer(1200, e -> showBattleBox());
+        resultPause.setRepeats(false);
+        resultPause.start();
+    }
+
+    private void showBattleBox() {
+        int currentWidth = dialogueContainer.getWidth();
+        int currentHeight = dialogueContainer.getHeight();
+
+        dialogueContainer.removeAll();
+
+        AnimateBox animator = new AnimateBox(currentWidth, currentHeight, 300, 250, () -> {
+            finalizeBattleBox(300, 250);
+        });
+
+        dialogueContainer.add(animator, BorderLayout.CENTER);
+        dialogueContainer.revalidate();
+        dialogueContainer.repaint();
+        animator.startAnimation();
+    }
+
+    private void finalizeBattleBox(int width, int height) {
+        dialogueContainer.removeAll();
+
+        ArenaPanel arena = new ArenaPanel(width, height, heartIcon, () -> {
+            // This is the callback blueprint slot for when an enemy's bullet pattern timer expires later
+            System.out.println("Enemy attack turn over!");  // Remove for finalization
+        });
+
+        // Use GridBagLayout wrapper to maintain perfect centering alignment configurations
+        JPanel centeringWrapper = new JPanel(new GridBagLayout());
+        centeringWrapper.setOpaque(false);
+        centeringWrapper.add(arena);
+
+        dialogueContainer.add(centeringWrapper, BorderLayout.CENTER);
+        dialogueContainer.revalidate();
+        dialogueContainer.repaint();
+
+        state = BattleState.ENEMY_TURN;
+        
+        arena.startTurn();
+    }
+
+    // GUI Functionalities
     private JPanel createStatusBar() {
         JPanel statusBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         statusBar.setBackground(Color.BLACK);
         statusBar.setBorder(BorderFactory.createEmptyBorder(10, 25, 5, 25));
 
-        // Load baseline custom font engine rule
-
-        // 1. Setup Main Stats Text
         statsTextLabel = new JLabel(playerName + "   LEVEL " + currentLvl + "/" + totalGameLvl + "    ");
         statsTextLabel.setFont(gameFont);
         statsTextLabel.setForeground(Color.WHITE);
 
-        // 2. Setup "HP" marker text (Slightly smaller size scale for aesthetic
-        // accuracy)
         JLabel hpMarker = new JLabel("HP  ");
-        hpMarker.setFont(gameFont.deriveFont(Font.BOLD, 14f));
+        hpMarker.setFont(gameFont);
         hpMarker.setForeground(Color.WHITE);
 
-        // 3. Render Status Canvas Blocks
         hpBarGraphic = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -235,83 +298,10 @@ public class BattlePanel extends JPanel {
         this.currentLvl = Math.clamp(level, 1, totalGameLvl);
 
         if (statsTextLabel != null && hpNumericLabel != null && hpBarGraphic != null) {
-            Font currentFont = statsTextLabel.getFont();
             statsTextLabel.setText(playerName + "   LEVEL " + currentLvl + "/" + totalGameLvl + "    ");
             hpNumericLabel.setText("   " + currentHp + " / " + maxHp);
             hpBarGraphic.repaint();
         }
-    }
-
-    private void startFightSequence() {
-        if (state != BattleState.PLAYER_TURN) {
-            return;
-        }
-        state = BattleState.FIGHT_MINIGAME;
-        clearSelectionIcons();
-
-        dialoguePanel.removeAll();
-        fightMinigame = new FightMinigamePanel(this::onFightDamageDealt);
-        dialoguePanel.add(fightMinigame, BorderLayout.CENTER);
-
-        dialoguePanel.revalidate();
-        dialoguePanel.repaint();
-
-        fightMinigame.start();
-    }
-
-    private void actPlaceholder() {
-    }
-
-    private void itemPlaceholder() {
-    }
-
-    private void mercyPlaceholder() {
-    }
-
-    private void onFightDamageDealt(int damage) {
-        Timer resultPause = new Timer(1200, e -> showBattleBox());
-        resultPause.setRepeats(false);
-        resultPause.start();
-    }
-
-    private void showBattleBox() {
-        int currentWidth = dialogueContainer.getWidth();
-        int currentHeight = dialogueContainer.getHeight();
-
-        dialogueContainer.removeAll();
-
-        AnimateBox animator = new AnimateBox(currentWidth, currentHeight, 300, 250, () -> {
-            finalizeBattleBox(300, 250);
-        });
-
-        dialogueContainer.add(animator, BorderLayout.CENTER);
-        dialogueContainer.revalidate();
-        dialogueContainer.repaint();
-        animator.startAnimation();
-    }
-
-    private void finalizeBattleBox(int width, int height) {
-        dialogueContainer.removeAll();
-
-        // Instantiate the isolated standalone battle arena component panel
-        ArenaPanel arena = new ArenaPanel(width, height, heartIcon, () -> {
-            // This is the callback blueprint slot for when an enemy's bullet pattern timer expires later
-            System.out.println("Enemy attack turn over!");
-        });
-
-        // Use GridBagLayout wrapper to maintain perfect centering alignment configurations
-        JPanel centeringWrapper = new JPanel(new GridBagLayout());
-        centeringWrapper.setOpaque(false);
-        centeringWrapper.add(arena);
-
-        dialogueContainer.add(centeringWrapper, BorderLayout.CENTER);
-        dialogueContainer.revalidate();
-        dialogueContainer.repaint();
-
-        state = BattleState.ENEMY_TURN;
-        
-        // Hand game loop control cleanly over to your custom Arena container box
-        arena.startTurn();
     }
 
     private void updateSelection() {

@@ -43,7 +43,6 @@ public class LeaderboardPanel extends JPanel {
         loadScores();
     }
 
-    /** Fetches the top players off the UI thread, then fills in the table. */
     private void loadScores() {
         new SwingWorker<List<LeaderboardEntry>, Void>() {
             @Override
@@ -56,7 +55,8 @@ public class LeaderboardPanel extends JPanel {
                 try {
                     showEntries(get());
                 } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace(); // full detail goes to the console
+                    // e.printStackTrace(); // uncomment for debugging
+                    System.out.println("Open XAMPP first.");
                     showMessage("Could not load leaderboard.");
                 }
             }
@@ -97,7 +97,6 @@ public class LeaderboardPanel extends JPanel {
         tablePanel.repaint();
     }
 
-    /** One table row: three cells sharing column widths (20% / 50% / 30%). */
     private void addRow(int row, String rank, String username, String level, Color color) {
         addCell(rank, 0, row, 0.2, SwingConstants.LEFT, color);
         addCell(username, 1, row, 0.5, SwingConstants.LEFT, color);
@@ -132,7 +131,6 @@ public class LeaderboardPanel extends JPanel {
         tablePanel.add(label, gbc);
     }
 
-    /** Soaks up leftover vertical space so rows stay packed at the top. */
     private void addFiller(int row) {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;

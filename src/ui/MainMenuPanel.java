@@ -30,8 +30,8 @@ public class MainMenuPanel extends JPanel {
 
         // == Uncomment/Comment to show bounds/panel borders == //
         btnPanel.setOpaque(false);
-        // menuPanel.setOpaque(false);
-        // artPanel.setOpaque(false);
+        menuPanel.setOpaque(false);
+        artPanel.setOpaque(false);
 
         menuPanel.setBackground(Color.RED);
         artPanel.setBackground(Color.BLUE);
@@ -64,10 +64,8 @@ public class MainMenuPanel extends JPanel {
 
         btnPanel.add(startBtn);
         btnPanel.add(Box.createVerticalStrut(20));
-
         btnPanel.add(leaderboardBtn);
         btnPanel.add(Box.createVerticalStrut(20));
-
         btnPanel.add(optionsBtn);
         btnPanel.add(Box.createVerticalStrut(20));
 
@@ -128,7 +126,6 @@ public class MainMenuPanel extends JPanel {
         setVisible(true);
     }
 
-    /** Opens the leaderboard as a glass-pane popup over the current menu. */
     private void showLeaderboard() {
         if (leaderboardOpen) {
             return;
@@ -141,7 +138,6 @@ public class MainMenuPanel extends JPanel {
         overlay.requestFocusInWindow();
     }
 
-    /** Called by the overlay when X is pressed. */
     private void hideLeaderboard() {
         leaderboardOpen = false;
         main.getRootPane().getGlassPane().setVisible(false);

@@ -11,12 +11,12 @@ public class LeaderboardDAO {
 
     // Highest level first; alphabetical by username breaks ties so the order is stable.
     private static final String TOP_PLAYERS_SQL =
-            "SELECT username, level FROM users "
+            "SELECT username, level FROM players "
             + "ORDER BY level DESC, username ASC LIMIT ?";
 
     // Only ever raises a player's record, never lowers it.
     private static final String UPDATE_HIGHEST_LEVEL_SQL =
-            "UPDATE users SET level = ? "
+            "UPDATE players SET level = ? "
             + "WHERE username = ? AND level < ?";
 
     /** Returns up to `limit` players, best first, with ranks 1..n filled in. */
