@@ -5,8 +5,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 
-import ui.Main;
-import ui.UIUtils;
+import ui.*;
 
 import battle.bullets.*;
 
@@ -35,7 +34,7 @@ public class BattlePanel extends JPanel {
     Font gameFont = UIUtils.undertaleFont;
 
     // == Roguelike Floor & Player Stats ==
-    private String playerName = "DOM";  // Change to take from DB
+    private String playerName = "DOM"; // Change to take from DB
     private int currentLvl = 1;
     private int currentHp = 20;
     private int maxHp = 20;
@@ -43,10 +42,11 @@ public class BattlePanel extends JPanel {
 
     // UI Status Components ==
     private JLabel statsTextLabel;
-    private JPanel hpBarGraphic;
+    private StatusBar healthBar;
     private JLabel hpNumericLabel;
 
     private final Main main;
+
     public BattlePanel(Main main) {
         this.main = main;
 
@@ -179,7 +179,6 @@ public class BattlePanel extends JPanel {
         setVisible(true);
     }
 
-
     private void actPlaceholder() {
     }
 
@@ -219,7 +218,7 @@ public class BattlePanel extends JPanel {
 
         dialogueContainer.removeAll();
 
-        AnimateBox animator = new AnimateBox(currentWidth, currentHeight, 300, 250, () -> {
+        AnimateBox animator = new AnimateBox(currentWidth, currentHeight, 350, 250, () -> {
             finalizeBattleBox(300, 250);
         });
 
@@ -236,7 +235,8 @@ public class BattlePanel extends JPanel {
                 this::onPlayerHit,
                 this::returnToPlayerTurn);
 
-        // Use GridBagLayout wrapper to maintain perfect centering alignment configurations
+        // Use GridBagLayout wrapper to maintain perfect centering alignment
+        // configurations
         JPanel centeringWrapper = new JPanel(new GridBagLayout());
         centeringWrapper.setOpaque(false);
         centeringWrapper.add(arena);
@@ -247,21 +247,32 @@ public class BattlePanel extends JPanel {
 
         state = BattleState.ENEMY_TURN;
 
-        // TODO: pick a pattern (or sequence of patterns) per enemy/floor once there's more than one
+        // TODO: pick a pattern (or sequence of patterns) per enemy/floor once there's
+        // more than one
         BulletPattern pattern = new BulletRain(width, height);
         arena.startTurn(pattern);
     }
 
-    /** Called by ArenaPanel whenever the heart takes a hit during the bullet phase. */
     private void onPlayerHit(int damage) {
         updatePlayerStats(currentHp - damage, currentLvl);
     }
 
-    /**
-     * Called once the bullet pattern finishes — closes the loop back to the
-     * command menu: restores the dialogue box and re-enables FIGHT/ACT/ITEM/MERCY.
-     */
     private void returnToPlayerTurn() {
+        int targetWidth = dialogueContainer.getWidth();
+        int targetHeight = dialogueContainer.getHeight();
+
+        dialogueContainer.removeAll();
+
+        // 20 seems to work here, don't change it >:(
+        AnimateBox animator = new AnimateBox(300, 250, targetWidth - 4, targetHeight - 20, this::restoreDialogueBox);
+
+        dialogueContainer.add(animator, BorderLayout.CENTER);
+        dialogueContainer.revalidate();
+        dialogueContainer.repaint();
+        animator.startAnimation();
+    }
+
+    private void restoreDialogueBox() {
         dialogueContainer.removeAll();
         dialoguePanel.removeAll();
         dialoguePanel.add(dialogueLabel, BorderLayout.CENTER);
@@ -271,10 +282,10 @@ public class BattlePanel extends JPanel {
         dialogueContainer.repaint();
 
         state = BattleState.PLAYER_TURN;
-        updateSelection(); // restores the heart on whichever command is currently selected
+        updateSelection();
     }
 
-    // GUI Functionalities
+    // GUI Functions
     private JPanel createStatusBar() {
         JPanel statusBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         statusBar.setBackground(Color.BLACK);
@@ -288,31 +299,16 @@ public class BattlePanel extends JPanel {
         hpMarker.setFont(gameFont);
         hpMarker.setForeground(Color.WHITE);
 
-        hpBarGraphic = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                double hpPercentage = (double) currentHp / maxHp;
-                int coloredWidth = (int) (getWidth() * hpPercentage);
+        // Assign directly to the class field
+        healthBar = new StatusBar(currentHp, maxHp);
 
-                g.setColor(Color.RED);
-                g.fillRect(0, 0, getWidth(), getHeight());
-
-                g.setColor(Color.YELLOW);
-                g.fillRect(0, 0, coloredWidth, getHeight());
-            }
-        };
-        hpBarGraphic.setPreferredSize(new Dimension(110, 20));
-        hpBarGraphic.setBackground(Color.BLACK);
-
-        // 4. Setup Fraction Label Text
         hpNumericLabel = new JLabel("   " + currentHp + " / " + maxHp);
         hpNumericLabel.setFont(gameFont);
         hpNumericLabel.setForeground(Color.WHITE);
 
         statusBar.add(statsTextLabel);
         statusBar.add(hpMarker);
-        statusBar.add(hpBarGraphic);
+        statusBar.add(healthBar); // Add the updated hp reference
         statusBar.add(hpNumericLabel);
 
         return statusBar;
@@ -322,10 +318,12 @@ public class BattlePanel extends JPanel {
         this.currentHp = Math.clamp(newHp, 0, maxHp);
         this.currentLvl = Math.clamp(level, 1, totalGameLvl);
 
-        if (statsTextLabel != null && hpNumericLabel != null && hpBarGraphic != null) {
+        if (statsTextLabel != null && hpNumericLabel != null && healthBar != null) {
             statsTextLabel.setText(playerName + "   LEVEL " + currentLvl + "/" + totalGameLvl + "    ");
             hpNumericLabel.setText("   " + currentHp + " / " + maxHp);
-            hpBarGraphic.repaint();
+
+            // Pass the updated values down so the percentage re-calculates properly!
+            healthBar.updateHp(currentHp, maxHp);
         }
     }
 

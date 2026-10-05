@@ -44,6 +44,8 @@ public class AnimateBox extends JPanel {
             // Animate width
             if (boxWidth > targetWidth) {
                 boxWidth = Math.max(targetWidth, boxWidth - stepX);
+            } else if (boxWidth < targetWidth) {
+                boxWidth = Math.min(targetWidth, boxWidth + stepX);
             } else {
                 widthDone = true;
             }

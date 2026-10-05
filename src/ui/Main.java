@@ -9,6 +9,7 @@ import battle.BattlePanel;
 //      Gameplay mechs
 //      Options
 //      Completely Revamp Login Page to add registration
+//      BattkePanel f. createStatusBar -> ui
 
 /* =================
     More things to do: #2

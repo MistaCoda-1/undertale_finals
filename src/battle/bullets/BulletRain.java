@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class BulletRain extends BulletPattern {
 
-    private static final int SPAWN_EVERY_TICKS = 1; // roughly 5/sec at a 16ms tick
+    private static final int SPAWN_EVERY_TICKS = 10; // roughly 5/sec at a 16ms tick
     private static final int BULLET_SIZE = 10;
     private static final double FALL_SPEED = 4.5;
     private static final int DAMAGE = 2;
