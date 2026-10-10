@@ -13,12 +13,15 @@ import java.util.concurrent.ThreadLocalRandom;
 public class BulletRain extends BulletPattern {
 
     private static final int SPAWN_EVERY_TICKS = 10; // roughly 5/sec at a 16ms tick
-    private static final int BULLET_SIZE = 10;
+    private static final int BULLET_SIZE = 20;
     private static final double FALL_SPEED = 4.5;
     private static final int DAMAGE = 2;
 
-    public BulletRain(int arenaWidth, int arenaHeight) {
+    private final Image bulletSprite; // Field to hold your loaded bullet image asset
+
+    public BulletRain(int arenaWidth, int arenaHeight, Image bulletSprite) {
         super(arenaWidth, arenaHeight, 300); // ~5 seconds of spawning at a 16ms tick
+        this.bulletSprite = bulletSprite;
     }
 
     @Override
@@ -27,6 +30,13 @@ public class BulletRain extends BulletPattern {
             return;
         }
         double x = ThreadLocalRandom.current().nextDouble(0, Math.max(1, arenaWidth - BULLET_SIZE));
-        bullets.add(new Bullet(x, -BULLET_SIZE, 0, FALL_SPEED, BULLET_SIZE, BULLET_SIZE, DAMAGE, Color.WHITE));
+        
+        if (bulletSprite != null) {
+            // Spawns bullets using your custom image asset
+            bullets.add(new Bullet(x, -BULLET_SIZE, 0, FALL_SPEED, BULLET_SIZE, BULLET_SIZE, DAMAGE, bulletSprite));
+        } else {
+            // Safe code fallback to the classic Undertale white square if no image is loaded
+            bullets.add(new Bullet(x, -BULLET_SIZE, 0, FALL_SPEED, BULLET_SIZE, BULLET_SIZE, DAMAGE, Color.WHITE));
+        }
     }
 }

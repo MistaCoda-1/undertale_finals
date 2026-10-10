@@ -8,19 +8,19 @@ import java.util.function.IntConsumer;
 import battle.bullets.*;
 
 public class ArenaPanel extends JPanel {
-    private final Image heartImage; 
+    private final Image heartImage;
     private final int heartWidth;
     private final int heartHeight;
-    
+
     private int soulX;
     private int soulY;
     private final int normalSpeed = 6;
     private final int focusSpeed = 3;
     private Timer gameLoopTimer;
-    
+
     private boolean moveUp, moveDown, moveLeft, moveRight;
     private boolean focusActive;
-    
+
     private final IntConsumer onPlayerHit;
     private final Runnable onTurnEnd;
 
@@ -48,16 +48,22 @@ public class ArenaPanel extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g); // Clear screen and draws the background/border
+        super.paintComponent(g);
 
         if (pattern != null) {
             for (Bullet bullet : pattern.getBullets()) {
-                g.setColor(bullet.color);
-                g.fillRect((int) bullet.x, (int) bullet.y, bullet.width, bullet.height);
+                if (bullet.sprite != null) {
+                    // Java stretches/shrinks the sprite to match the bullet's assigned width &
+                    // height properties!
+                    g.drawImage(bullet.sprite, (int) bullet.x, (int) bullet.y, bullet.width, bullet.height, this);
+                } else {
+                    // Fallback vector box
+                    g.setColor(bullet.color);
+                    g.fillRect((int) bullet.x, (int) bullet.y, bullet.width, bullet.height);
+                }
             }
         }
 
-        // simple invincibility flicker: skip drawing the heart every few ticks while it's active
         boolean drawHeart = invincibleTicks <= 0 || (invincibleTicks / 4) % 2 == 0;
         if (drawHeart) {
             g.drawImage(heartImage, soulX, soulY, heartWidth, heartHeight, this);
@@ -77,13 +83,17 @@ public class ArenaPanel extends JPanel {
             double dx = 0;
             double dy = 0;
 
-            if (moveLeft)  dx -= 1;
-            if (moveRight) dx += 1;
-            if (moveUp)    dy -= 1;
-            if (moveDown)  dy += 1;
+            if (moveLeft)
+                dx -= 1;
+            if (moveRight)
+                dx += 1;
+            if (moveUp)
+                dy -= 1;
+            if (moveDown)
+                dy += 1;
 
             if (dx != 0 && dy != 0) {
-                dx *= 0.7071; 
+                dx *= 0.7071;
                 dy *= 0.7071;
             }
 
@@ -116,14 +126,11 @@ public class ArenaPanel extends JPanel {
         requestFocusInWindow();
     }
 
-    /** Heart-vs-bullet collision, with a short invincibility window after each hit. */
     private void checkCollisions() {
         if (invincibleTicks > 0) {
             invincibleTicks--;
             return;
         }
-
-        // hitbox is a little smaller than the sprite, same idea as Undertale's forgiving hit detection
         Rectangle heartBounds = new Rectangle(soulX + 4, soulY + 4, heartWidth - 8, heartHeight - 8);
 
         for (Bullet bullet : pattern.getBullets()) {
@@ -151,26 +158,76 @@ public class ArenaPanel extends JPanel {
 
         // Directional Pressed Mappings
         im.put(KeyStroke.getKeyStroke("UP"), "pressUp");
-        am.put("pressUp", new AbstractAction() { @Override public void actionPerformed(ActionEvent e) { moveUp = true; } });
+        am.put("pressUp", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveUp = true;
+            }
+        });
         im.put(KeyStroke.getKeyStroke("DOWN"), "pressDown");
-        am.put("pressDown", new AbstractAction() { @Override public void actionPerformed(ActionEvent e) { moveDown = true; } });
+        am.put("pressDown", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveDown = true;
+            }
+        });
         im.put(KeyStroke.getKeyStroke("LEFT"), "pressLeft");
-        am.put("pressLeft", new AbstractAction() { @Override public void actionPerformed(ActionEvent e) { moveLeft = true; } });
+        am.put("pressLeft", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveLeft = true;
+            }
+        });
         im.put(KeyStroke.getKeyStroke("RIGHT"), "pressRight");
-        am.put("pressRight", new AbstractAction() { @Override public void actionPerformed(ActionEvent e) { moveRight = true; } });
+        am.put("pressRight", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveRight = true;
+            }
+        });
         im.put(KeyStroke.getKeyStroke("X"), "pressX");
-        am.put("pressX", new AbstractAction() { @Override public void actionPerformed(ActionEvent e) { focusActive = true; } });
+        am.put("pressX", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                focusActive = true;
+            }
+        });
 
         // Directional Released Mappings
         im.put(KeyStroke.getKeyStroke("released UP"), "releaseUp");
-        am.put("releaseUp", new AbstractAction() { @Override public void actionPerformed(ActionEvent e) { moveUp = false; } });
+        am.put("releaseUp", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveUp = false;
+            }
+        });
         im.put(KeyStroke.getKeyStroke("released DOWN"), "releaseDown");
-        am.put("releaseDown", new AbstractAction() { @Override public void actionPerformed(ActionEvent e) { moveDown = false; } });
+        am.put("releaseDown", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveDown = false;
+            }
+        });
         im.put(KeyStroke.getKeyStroke("released LEFT"), "releaseLeft");
-        am.put("releaseLeft", new AbstractAction() { @Override public void actionPerformed(ActionEvent e) { moveLeft = false; } });
+        am.put("releaseLeft", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveLeft = false;
+            }
+        });
         im.put(KeyStroke.getKeyStroke("released RIGHT"), "releaseRight");
-        am.put("releaseRight", new AbstractAction() { @Override public void actionPerformed(ActionEvent e) { moveRight = false; } });
+        am.put("releaseRight", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveRight = false;
+            }
+        });
         im.put(KeyStroke.getKeyStroke("released X"), "releaseX");
-        am.put("releaseX", new AbstractAction() { @Override public void actionPerformed(ActionEvent e) { focusActive = false; } });
+        am.put("releaseX", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                focusActive = false;
+            }
+        });
     }
 }

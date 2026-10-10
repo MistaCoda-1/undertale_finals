@@ -9,20 +9,6 @@ import ui.*;
 
 import battle.bullets.*;
 
-/**
- * The battle screen, laid out with absolute positioning instead of nested
- * layout managers. Everything lives on one fixed-size "stage" panel and is
- * placed with setBounds() using the constants below.
- *
- * Vertical order on the stage, top to bottom:
- *   enemy -> enemy HP -> dialogue box / arena -> player status -> commands
- *
- * Each Y constant is built from the one above it (BOX_Y follows ENEMY_HP_Y,
- * and so on), so the stack stays consistent: resize something and everything
- * below it shifts by that amount, because the arithmetic says so, not because
- * a layout manager decided to. To pin something in place regardless, replace
- * its expression with a plain number.
- */
 public class BattlePanel extends JPanel {
     enum BattleState {
         PLAYER_TURN,
@@ -30,12 +16,12 @@ public class BattlePanel extends JPanel {
         ENEMY_TURN
     }
 
-    // ===== Stage: fixed design size, centered in whatever space the window gives =====
+    // ===== Stage: fixed design size, centered in whatever space the window gives
     private static final int STAGE_W = 960;
     private static final int STAGE_H = 700;
 
     // ===== Enemy =====
-    private static final int ENEMY_W = 420;
+    private static final int ENEMY_W = 700;
     private static final int ENEMY_H = 280;
     private static final int ENEMY_X = (STAGE_W - ENEMY_W) / 2;
     private static final int ENEMY_Y = 8;
@@ -71,12 +57,12 @@ public class BattlePanel extends JPanel {
     private CommandButton[] buttons;
     private Runnable[] commandActions;
 
-    EnemyBG enemyPanel = new EnemyBG(new Color(0, 255, 60), 70);
+    EnemyBG enemyPanel = new EnemyBG(new Color(0, 255, 60), 140);
     JPanel dialoguePanel = new JPanel(new BorderLayout());
 
     private JLabel dialogueLabel;
     private FightMinigamePanel fightMinigame;
-    private Component dialogueSlot; // whatever currently occupies the dialogue/arena area
+    private Component dialogueSlot;
 
     private final ImageIcon heartIcon = new ImageIcon(getClass().getResource("/resources/player_soul.png"));
     Font gameFont = UIUtils.undertaleFont;
@@ -92,12 +78,16 @@ public class BattlePanel extends JPanel {
     private int enemyHp = 50; // placeholder — swap for real per-enemy data later
     private int enemyMaxHp = 50;
 
+    // == Enemy Progression Tracker ==
+    private int enemyFightCount = 1;
+
     // UI Status Components ==
     private JLabel statsTextLabel;
     private JLabel hpMarker;
     private StatusBar healthBar;
     private JLabel hpNumericLabel;
     private StatusBar enemyHealthBar;
+    private Image bulletSprite;
 
     private final Main main;
 
@@ -110,6 +100,7 @@ public class BattlePanel extends JPanel {
         stage.setBackground(Color.BLACK);
         add(stage);
 
+        loadBullet();
         buildEnemy();
         buildEnemyStatus();
         buildDialogueBox();
@@ -120,7 +111,20 @@ public class BattlePanel extends JPanel {
         updateSelection();
     }
 
-    /** Keeps the fixed-size stage centered in whatever space the window gives this panel. */
+    public void loadBullet() {
+        try {
+            var resource = getClass().getResource("/resources/bullet2.png");
+            if (resource != null) {
+                this.bulletSprite = javax.imageio.ImageIO.read(resource);
+            } else {
+                System.err.println("Bullet sprite not found");
+            }
+        } catch (java.io.IOException e) {
+            System.err.println("Error reading bullet asset file: " + e.getMessage());
+            this.bulletSprite = null;
+        }
+    }
+
     @Override
     public void doLayout() {
         stage.setBounds((getWidth() - STAGE_W) / 2, (getHeight() - STAGE_H) / 2, STAGE_W, STAGE_H);
@@ -135,16 +139,22 @@ public class BattlePanel extends JPanel {
         enemyPanel.setBounds(ENEMY_X, ENEMY_Y, ENEMY_W, ENEMY_H);
 
         ImageIcon originalIcon = new ImageIcon(getClass().getResource("/resources/enemy.png"));
-        Image scaledImage = originalIcon.getImage().getScaledInstance(
-                ENEMY_SPRITE,
-                ENEMY_SPRITE,
-                Image.SCALE_SMOOTH);
+        Image img = originalIcon.getImage();
+
+        int rawW = originalIcon.getIconWidth();
+        int rawH = originalIcon.getIconHeight();
+
+        int targetH = ENEMY_SPRITE;
+        int targetW = (int) Math.round(((double) rawW / rawH) * targetH);
+
+        Image scaledImage = img.getScaledInstance(targetW, targetH, Image.SCALE_SMOOTH);
         JLabel enemySprite = new JLabel(new ImageIcon(scaledImage));
+
         enemySprite.setBounds(
-                (ENEMY_W - ENEMY_SPRITE) / 2,
-                (ENEMY_H - ENEMY_SPRITE) / 2,
-                ENEMY_SPRITE,
-                ENEMY_SPRITE);
+                (ENEMY_W - targetW) / 2,
+                (ENEMY_H - targetH) / 2,
+                targetW,
+                targetH);
 
         enemyPanel.add(enemySprite);
         stage.add(enemyPanel);
@@ -171,7 +181,7 @@ public class BattlePanel extends JPanel {
                 BorderFactory.createLineBorder(Color.WHITE),
                 new EmptyBorder(15, 20, 15, 20)));
 
-        dialogueLabel = makeLabel("'SEEEEKAAAAAAIIII DEEEEEE!!!'");
+        dialogueLabel = makeLabel("Ribbit . . .");
         dialogueLabel.setHorizontalAlignment(SwingConstants.CENTER);
         dialoguePanel.add(dialogueLabel, BorderLayout.CENTER);
 
@@ -272,10 +282,6 @@ public class BattlePanel extends JPanel {
     // DIALOGUE / ARENA AREA
     // ==========================================
 
-    /**
-     * The dialogue box, the box-resize animation, and the arena all take turns
-     * occupying the same area. This swaps whoever's there for a new occupant.
-     */
     private void setDialogueSlot(Component occupant, int x, int y, int w, int h) {
         if (dialogueSlot != null) {
             stage.remove(dialogueSlot);
@@ -287,7 +293,6 @@ public class BattlePanel extends JPanel {
         stage.repaint();
     }
 
-    /** Puts a box-resize animation over the dialogue area, with BOX_PAD of slack so the stroke isn't clipped. */
     private AnimateBox placeAnimator(int fromW, int fromH, int toW, int toH, Runnable onDone) {
         AnimateBox animator = new AnimateBox(fromW, fromH, toW, toH, onDone);
         setDialogueSlot(animator,
@@ -338,7 +343,6 @@ public class BattlePanel extends JPanel {
         resultPause.start();
     }
 
-    /** Dialogue box shrinks down to the arena's size, then the arena takes over. */
     private void showBattleBox() {
         placeAnimator(BOX_W, BOX_H, ARENA_W, ARENA_H, this::finalizeBattleBox).startAnimation();
     }
@@ -359,14 +363,13 @@ public class BattlePanel extends JPanel {
 
         // TODO: pick a pattern (or sequence of patterns) per enemy/floor once there's
         // more than one
-        arena.startTurn(new BulletRain(ARENA_W, ARENA_H));
+        arena.startTurn(new BulletRain(ARENA_W, ARENA_H, bulletSprite));
     }
 
     private void onPlayerHit(int damage) {
         updatePlayerStats(currentHp - damage, currentLvl);
     }
 
-    /** Arena grows back out to the full dialogue box size, then the menu reopens. */
     private void returnToPlayerTurn() {
         placeAnimator(ARENA_W, ARENA_H, BOX_W, BOX_H, this::restoreDialogueBox).startAnimation();
     }
@@ -392,12 +395,6 @@ public class BattlePanel extends JPanel {
         return currentHp + " / " + maxHp;
     }
 
-    /**
-     * Lays the status row out left to right: name/level, "HP", bar, numbers.
-     * The text widths change (level 9 -> 10, a longer name), so each item is
-     * placed right after the previous one's actual width. Called whenever the
-     * text changes.
-     */
     private void layoutStatusRow() {
         int x = BOX_X;
 
@@ -410,7 +407,6 @@ public class BattlePanel extends JPanel {
         placeRowLabel(hpNumericLabel, x);
     }
 
-    /** Places a label at x on the status row, sized to its text. Returns the x where it ends. */
     private int placeRowLabel(JLabel label, int x) {
         int w = label.getPreferredSize().width;
         label.setBounds(x, STATUS_Y, w, ROW_H);
@@ -424,7 +420,7 @@ public class BattlePanel extends JPanel {
         if (statsTextLabel != null && hpNumericLabel != null && healthBar != null) {
             statsTextLabel.setText(statsText());
             hpNumericLabel.setText(hpText());
-            layoutStatusRow(); // text widths may have changed
+            layoutStatusRow();
 
             healthBar.updateHp(currentHp, maxHp);
         }

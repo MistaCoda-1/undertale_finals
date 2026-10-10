@@ -18,7 +18,22 @@ public class Bullet {
     public final int height;
     public final int damage;
     public final Color color;
+    public final Image sprite;
 
+    // Primary constructor
+    public Bullet(double x, double y, double vx, double vy, int width, int height, int damage, Image sprite) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.width = width;
+        this.height = height;
+        this.damage = damage;
+        this.sprite = sprite;
+        this.color = Color.WHITE; // Default fallback color
+    }
+
+    // Fallback constructor
     public Bullet(double x, double y, double vx, double vy, int width, int height, int damage, Color color) {
         this.x = x;
         this.y = y;
@@ -28,6 +43,7 @@ public class Bullet {
         this.height = height;
         this.damage = damage;
         this.color = color;
+        this.sprite = null;
     }
 
     public void advance() {
