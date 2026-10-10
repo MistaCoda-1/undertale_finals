@@ -2,6 +2,7 @@ package battle;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
 public class FightMinigamePanel extends JPanel {
 
@@ -12,7 +13,7 @@ public class FightMinigamePanel extends JPanel {
     private static final int BAR_WIDTH = 750;
     private static final int BAR_HEIGHT = 20;
     private static final int TARGET_WIDTH = 30;
-    private static final int MAX_DAMAGE = 20;
+    private static final int MAX_DAMAGE = 10;
     private static final int BAR_Y = 100;
 
     private final Timer tickTimer;
@@ -42,7 +43,7 @@ public class FightMinigamePanel extends JPanel {
 
         InputMap inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = getActionMap();
-        inputMap.put(KeyStroke.getKeyStroke("SPACE"), "lockIn");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, 0), "lockIn");
         actionMap.put("lockIn", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -105,7 +106,7 @@ public class FightMinigamePanel extends JPanel {
         // hint / result text
         g2.setFont(getFont().deriveFont(Font.BOLD, 16f));
         g2.setColor(Color.WHITE);
-        String message = "PRESS SPACE!";
+        String message = "Press Z in the white zone!";
         if (locked) {
             message = lastDamage > 0 ? ("DAMAGE: " + lastDamage) : "MISS!";
         }
